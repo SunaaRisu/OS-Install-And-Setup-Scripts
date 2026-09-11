@@ -60,4 +60,9 @@ pacstrap -K /mnt base linux linux-firmware sof-firmware base-devel grub efibootm
 genfstab /mnt > /mnt/etc/fstab
 
 # Changing root
-arch-chroot /mnt curl -LJO https://raw.githubusercontent.com/SunaaRisu/OS-Install-And-Setup-Scripts/refs/heads/main/cachyos/scripts/CachyOS-Config.sh && ./CachyOS-Config.sh && rm CachyOS-Config.sh
+arch-chroot /mnt /bin/bash <<END
+curl -LJO https://raw.githubusercontent.com/SunaaRisu/OS-Install-And-Setup-Scripts/refs/heads/main/cachyos/scripts/CachyOS-Config.sh
+chmod +x CachyOS-Config.sh
+./CachyOS-Config.sh
+rm CachyOS-Config.sh
+END
