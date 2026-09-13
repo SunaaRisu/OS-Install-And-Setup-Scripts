@@ -30,6 +30,9 @@ clear -x
 # Encrypt disk
 read -r -p "Should the root disk be encrypted? [y/N] " encrypt
 clear -x
+# Hostname
+read -r -p "Hostname: " hn
+clear -x
 
 # Update the system clock
 timedatectl
@@ -84,6 +87,8 @@ pacstrap -K /mnt base base-devel linux linux-firmware util-linux ufw pipewire pi
 # Generate fstab
 genfstab /mnt > /mnt/etc/fstab
 
+echo $hn > /mnt/etc/hostname
+
 # Changing root
 arch-chroot /mnt /bin/bash <<END
 ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
@@ -92,15 +97,15 @@ sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
 locale-gen
 echo LANG=en_US.UTF-8 > /etc/locale.conf
 echo KEYMAP=dvorak > /etc/vconsole.conf
-read -r -p "Hostname: " hn
-echo $hn > /etc/hostname
+
+
+
+
 passwd
 useradd -m -g users -G wheel sunaa
 passwd sunaa
 sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
-read -r -p "Disk: /dev/" partDisk
-read -r -p "Is the disk encryted? [y/N] " response
-if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]
+if [[ "$encrypt" =~ ^([yY][eE][sS]|[yY])$ ]]
 then
   sed -i 's/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems fsck)/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt lvm2 filesystems fsck)/' /etc/mkinitcpio.conf
   mkinitcpio -P
