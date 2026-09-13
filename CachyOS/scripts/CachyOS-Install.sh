@@ -71,8 +71,8 @@ mount --mkdir /dev/${partDisk}1 /mnt/boot
 swapon /dev/${partDisk}2
 
 # Install essential packages
-pacman -Syy
-pacstrap -K /mnt base base-devel linux linux-firmware btrfs-progs limine efibootmgr nvim networkmanager bash-completio man btop fastfetch git tree sudo
+pacman -Syyu
+pacstrap -K /mnt base base-devel linux linux-firmware btrfs-progs limine efibootmgr nvim networkmanager bash-completion man btop fastfetch git tree sudo
 
 # Generate fstab
 genfstab /mnt > /mnt/etc/fstab
