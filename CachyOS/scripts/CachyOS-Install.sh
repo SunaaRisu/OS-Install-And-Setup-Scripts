@@ -166,6 +166,7 @@ else
 fi
 
 systemctl enable NetworkManager
+systemctl enable bluetooth
 
 # # Greetd config
 # pacman -S greetd
