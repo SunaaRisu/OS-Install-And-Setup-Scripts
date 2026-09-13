@@ -31,7 +31,6 @@ clear -x
 read -r -p "Should the root disk be encrypted? [y/N] " encrypt
 clear -x
 
-
 # Update the system clock
 timedatectl
 
@@ -41,71 +40,49 @@ parted --script /dev/${partDisk} \
     mklabel gpt \
     mkpart primary fat32 1MiB 4099MiB \
     set 1 esp on \
-    mkpart primary "" 4100MiB 12299MiB \
-    set 2 swap on \
-    mkpart primary ext4 12300MiB 100%
+    mkpart Linux btrfs 4100MiB 100%
 
 # Format the Partitions
 if [[ $partDisk == *"nvme"* ]]; then
   partDisk="${partDisk}p"
 fi
 
-mkswap /dev/${partDisk}2
 mkfs.fat -F 32 /dev/${partDisk}1
 
 if [[ "$encrypt" =~ ^([yY][eE][sS]|[yY])$ ]]
 then
-  cryptsetup luksFormat /dev/${partDisk}3
-  cryptsetup open /dev/${partDisk}3 cryptroot
-  mkfs.ext4 /dev/mapper/cryptroot
-
-  mount /dev/mapper/cryptroot /mnt
+  cryptsetup luksFormat /dev/${partDisk}2
+  cryptsetup open /dev/${partDisk}2 cryptroot
+  mkfs.btrfs /dev/mapper/cryptroot
+  rootDisk="/dev/mapper/cryptroot"  
 else
-  mkfs.ext4 /dev/${partDisk}3
-  
-  mount /dev/${partDisk}3 /mnt
+  mkfs.btrfs /dev/${partDisk}2
+  rootDisk="/dev/${partDisk}2"
 fi
+mount ${rootDisk} /mnt
+
+# Create subvolumes
+btrfs subvolume create /mnt/@
+btrfs subvolume create /mnt/@home
+btrfs subvolume create /mnt/@var_log
+btrfs subvolume create /mnt/@var_cache
+btrfs subvolume create /mnt/@snapshots
 
 # Mount the file system
+umount /mnt
+mount -o subvol=@ ${rootDisk} /mnt
+mount --mkdir -o subvol=@home ${rootDisk} /mnt/home
+mount --mkdir -o subvol=@var_log ${rootDisk} /mnt/var/log
+mount --mkdir -o subvol=@var_cache ${rootDisk} /mnt/var/cache
+mount --mkdir -o subvol=@snapshots ${rootDisk} /mnt/.snapshots
 mount --mkdir /dev/${partDisk}1 /mnt/boot
-swapon /dev/${partDisk}2
 
 # Install essential packages
 pacman -Syyu
-pacstrap -K /mnt base base-devel linux linux-firmware btrfs-progs limine efibootmgr nvim networkmanager bash-completion man btop fastfetch git tree sudo
+pacstrap -K /mnt base base-devel linux linux-firmware util-linux ufw pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber sof-firmware bluez bluez-utils btrfs-progs limine efibootmgr nvim networkmanager man btop fastfetch git tree sudo
 
 # Generate fstab
 genfstab /mnt > /mnt/etc/fstab
-
-
-
-
-
-
-
-
-
-
-exit 0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # Changing root
 arch-chroot /mnt /bin/bash <<END
