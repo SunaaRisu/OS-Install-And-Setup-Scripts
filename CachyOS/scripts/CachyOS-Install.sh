@@ -36,7 +36,14 @@ clear -x
 timedatectl
 
 # Partition the disks
-cfdisk /dev/${partDisk}
+sgdisk --zap-all /dev/${partDisk}
+parted --script /dev/${partDisk} \
+    mklabel gpt \
+    mkpart primary fat32 1MiB 4099MiB \
+    set 1 esp on \
+    mkpart primary "" 4100MiB 12299MiB \
+    set 2 swap on \
+    mkpart primary ext4 12300MiB 100%
 
 # Format the Partitions
 if [[ $partDisk == *"nvme"* ]]; then
