@@ -87,6 +87,7 @@ pacstrap -K /mnt base base-devel linux linux-firmware util-linux ufw pipewire pi
 # Generate fstab
 genfstab /mnt > /mnt/etc/fstab
 
+# Set hostname
 echo $hn > /mnt/etc/hostname
 
 # Changing root
@@ -105,26 +106,68 @@ passwd
 useradd -m -g users -G wheel sunaa
 passwd sunaa
 sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
+
+# Edit mkinitcpio
+sed -i 's/MODULES=()/MODULES=(btrfs)/' /etc/mkinitcpio.conf
+sed -i 's/BINARIES=()/BINARIES=(/usr/bin/btrfs)/' /etc/mkinitcpio.conf
 if [[ "$encrypt" =~ ^([yY][eE][sS]|[yY])$ ]]
 then
-  sed -i 's/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems fsck)/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt lvm2 filesystems fsck)/' /etc/mkinitcpio.conf
-  mkinitcpio -P
-  grub-install --efi-directory=/boot /dev/${partDisk}
-  if [[ $partDisk == *"nvme"* ]]; then
-    partDisk="${partDisk}p"
-  fi
-  blkid -o value -s UUID /dev/${partDisk}2 >> /etc/default/grub
-  blkid -o value -s UUID /dev/mapper/cryptroot >> /etc/default/grub
-  
-  sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"/GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet cryptdevice=UUID=${uuidone}:cryptroot root=UUID=${uuidtwo}"/' /etc/default/grub
-  nvim /etc/default/grub
-
-  grub-mkconfig -o /boot/grub/grub.cfg
+  sed -i 's/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems fsck)/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt filesystems resume fsck)/' /etc/mkinitcpio.conf
 else  
-  grub-install --efi-directory=/boot /dev/${partDisk}
-  grub-mkconfig -o /boot/grub/grub.cfg
+  sed -i 's/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems fsck)/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems resume fsck)/' /etc/mkinitcpio.conf
 fi
+mkinitcpio -P
+
+# Setup limine bootloader
+mkdir -p /boot/EFI/limine
+cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
+efibootmgr --create --disk /dev/${partDisk} --part 1 \
+      --label "Arch Linux Limine Bootloader" \
+      --loader '\EFI\limine\BOOTX64.EFI' \
+      --unicode
+
+if [[ "$encrypt" =~ ^([yY][eE][sS]|[yY])$ ]]
+then
+  echo "timeout: 3
+
+  /Arch Linux
+      protocol: linux
+      path: boot():/vmlinuz-linux
+      cmdline: quiet cryptdevice=UUID=$(cryptsetup luksUUID /dev/${partDisk}2):root root=/dev/mapper/cryptroot rw rootflags=subvol=@ rootfstype=btrfs
+      module_path: boot():/initramfs-linux.img
+
+  /Arch Linux (fallback)
+      protocol: linux
+      path: boot():/vmlinuz-linux
+      cmdline: quiet cryptdevice=UUID=$(cryptsetup luksUUID /dev/${partDisk}2):root root=/dev/mapper/cryptroot rw rootflags=subvol=@ rootfstype=btrfs
+      module_path: boot():/initramfs-linux-fallback.img
+  
+  /Memtest86+
+    protocol: efi
+    path: boot():/memtest86+/memtest.efi" > /boot/EFI/limine/limine.conf
+else
+  echo "timeout: 3
+
+  /Arch Linux
+      protocol: linux
+      path: boot():/vmlinuz-linux
+      cmdline: quiet root=$(blkid -o value -s UUID /dev/${partDisk}2) rw rootflags=subvol=@ rootfstype=btrfs
+      module_path: boot():/initramfs-linux.img
+
+  /Arch Linux (fallback)
+      protocol: linux
+      path: boot():/vmlinuz-linux
+      cmdline: quiet root=$(blkid -o value -s UUID /dev/${partDisk}2) rw rootflags=subvol=@ rootfstype=btrfs
+      module_path: boot():/initramfs-linux-fallback.img
+  
+  /Memtest86+
+    protocol: efi
+    path: boot():/memtest86+/memtest.efi" > /boot/EFI/limine/limine.conf"
+fi
+
 systemctl enable NetworkManager
+
+exit 0
 
 # Greetd config
 pacman -S greetd
