@@ -135,7 +135,7 @@ arch-chroot /mnt /bin/bash <<END
 mkdir -p /boot/EFI/limine
 cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
 efibootmgr --create --disk /dev/${partDisk} --part 1 \
-      --label "Arch Linux Limine Bootloader" \
+      --label "CachyOS Linux Limine Bootloader" \
       --loader '\EFI\limine\BOOTX64.EFI' \
       --unicode
 
@@ -175,7 +175,7 @@ else
   
   /Memtest86+
     protocol: efi
-    path: boot():/memtest86+/memtest.efi" > /boot/EFI/limine/limine.conf"
+    path: boot():/memtest86+/memtest.efi" > /boot/EFI/limine/limine.conf
 fi
 END
 
