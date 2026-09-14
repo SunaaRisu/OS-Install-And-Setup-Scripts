@@ -18,7 +18,7 @@ else
     exit 1
   fi
 fi
-clear -x
+clear
 
 # Get needed variables and settings
 # Disk selection
@@ -26,13 +26,23 @@ printf "Which disk should be partitioned?\n\n"
 lsblk
 printf "\n\n"
 read -r -p "/dev/" partDisk
-clear -x
+clear
 # Encrypt disk
 read -r -p "Should the root disk be encrypted? [y/N] " encrypt
-clear -x
+clear
 # Hostname
 read -r -p "Hostname: " hn
-clear -x
+clear
+# User setup
+read -r -p "Username: " user
+read -r -p "Password: " user_pass
+read -r -p "Use same Password for root? [y/N] " user_pass_same_as_root
+if [[ "$user_pass_same_as_root" =~ ^([yY][eE][sS]|[yY])$ ]]
+then 
+  root_pass=$user_pass
+else
+  read -r -p "Root Password: " root_pass
+fi
 
 # Update the system clock
 timedatectl
@@ -90,24 +100,25 @@ genfstab /mnt > /mnt/etc/fstab
 # Set hostname
 echo $hn > /mnt/etc/hostname
 
-# Changing root
+# Setup Locale
 arch-chroot /mnt /bin/bash <<END
 ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
 hwclock --systohc
-sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+sed -i 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
 locale-gen
 echo LANG=en_US.UTF-8 > /etc/locale.conf
 echo KEYMAP=dvorak > /etc/vconsole.conf
+END
 
-
-
-
-passwd
-useradd -m -g users -G wheel sunaa
-passwd sunaa
+# Setup User
+arch-chroot /mnt /bin/bash <<END
+useradd -m -g users -G wheel ${user}
+echo -e "root:${root_pass}\n${user}:${user_pass}" | chpasswd
 sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
+END
 
 # Edit mkinitcpio
+arch-chroot /mnt /bin/bash <<END
 sed -i 's/MODULES=()/MODULES=(btrfs)/' /etc/mkinitcpio.conf
 sed -i 's/BINARIES=()/BINARIES=(/usr/bin/btrfs)/' /etc/mkinitcpio.conf
 if [[ "$encrypt" =~ ^([yY][eE][sS]|[yY])$ ]]
@@ -117,8 +128,10 @@ else
   sed -i 's/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems fsck)/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems resume fsck)/' /etc/mkinitcpio.conf
 fi
 mkinitcpio -P
+END
 
 # Setup limine bootloader
+arch-chroot /mnt /bin/bash <<END
 mkdir -p /boot/EFI/limine
 cp /usr/share/limine/BOOTX64.EFI /boot/EFI/limine/
 efibootmgr --create --disk /dev/${partDisk} --part 1 \
