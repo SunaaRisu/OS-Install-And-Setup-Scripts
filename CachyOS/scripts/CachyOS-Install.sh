@@ -197,7 +197,7 @@ END
 
 # Ly Setup
 arch-chroot /mnt /bin/bash <<END
-pacman -S ly brightnessctl xorg-xauth --noconfirm
+pacman -S ly brightnessctl xorg-xauth xorg-server --noconfirm
 systemctl enable ly@tty1.service
 END
 
@@ -264,7 +264,7 @@ END
 
 clear
 echo -e "Installation finished.\n\n\n"
-arch-chroot \mnt fastfetch
+arch-chroot /mnt fastfetch
 echo -e "\n\n\n"
 read -r -p "Press any key to reboot into CachyOS." key
 umount -a
