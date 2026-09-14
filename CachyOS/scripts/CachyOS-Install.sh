@@ -120,12 +120,12 @@ END
 # Edit mkinitcpio
 arch-chroot /mnt /bin/bash <<END
 sed -i 's/MODULES=()/MODULES=(btrfs)/' /etc/mkinitcpio.conf
-sed -i 's/BINARIES=()/BINARIES=(/usr/bin/btrfs)/' /etc/mkinitcpio.conf
+sed -i 's/BINARIES=()/BINARIES=(\/usr\/bin\/btrfs)/' /etc/mkinitcpio.conf
 if [[ "$encrypt" =~ ^([yY][eE][sS]|[yY])$ ]]
 then
-  sed -i 's/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems fsck)/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt filesystems resume fsck)/' /etc/mkinitcpio.conf
+  sed -i 's/HOOKS=.*/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt filesystems resume fsck)/' /etc/mkinitcpio.conf
 else  
-  sed -i 's/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems fsck)/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems resume fsck)/' /etc/mkinitcpio.conf
+  sed -i 's/HOOKS=.*/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems resume fsck)/' /etc/mkinitcpio.conf
 fi
 mkinitcpio -P
 END
@@ -177,7 +177,9 @@ else
     protocol: efi
     path: boot():/memtest86+/memtest.efi" > /boot/EFI/limine/limine.conf"
 fi
+END
 
+arch-chroot /mnt /bin/bash << END
 systemctl enable NetworkManager
 systemctl enable bluetooth
 
