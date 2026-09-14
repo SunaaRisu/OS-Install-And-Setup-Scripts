@@ -131,9 +131,9 @@ sed -i 's/MODULES=()/MODULES=(btrfs)/' /etc/mkinitcpio.conf
 sed -i 's/BINARIES=()/BINARIES=(\/usr\/bin\/btrfs)/' /etc/mkinitcpio.conf
 if [[ "$encrypt" =~ ^([yY][eE][sS]|[yY])$ ]]
 then
-  sed -i 's/HOOKS=.*/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt filesystems fsck)/' /etc/mkinitcpio.conf
+  sed -i 's/HOOKS=.*/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt filesystems resume fsck)/' /etc/mkinitcpio.conf
 else  
-  sed -i 's/HOOKS=.*/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems fsck)/' /etc/mkinitcpio.conf
+  sed -i 's/HOOKS=.*/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems resume fsck)/' /etc/mkinitcpio.conf
 fi
 mkinitcpio -P
 END
