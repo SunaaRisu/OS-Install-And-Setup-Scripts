@@ -80,6 +80,7 @@ btrfs subvolume create /mnt/@home
 btrfs subvolume create /mnt/@var_log
 btrfs subvolume create /mnt/@var_cache
 btrfs subvolume create /mnt/@snapshots
+btrfs subvolume create /mnt/swap
 
 # Mount the file system
 umount /mnt
@@ -89,10 +90,12 @@ mount --mkdir -o subvol=@var_log ${rootDisk} /mnt/var/log
 mount --mkdir -o subvol=@var_cache ${rootDisk} /mnt/var/cache
 mount --mkdir -o subvol=@snapshots ${rootDisk} /mnt/.snapshots
 mount --mkdir /dev/${partDisk}1 /mnt/boot
+btrfs filesystem mkswapfile --size 4g --uuid clear /mnt/swap/swapfile
+swapon -p 0 /mnt/swap/swapfile
 
 # Install essential packages
 pacman -Syyu
-pacstrap -K /mnt base base-devel linux linux-firmware util-linux ufw pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber sof-firmware bluez bluez-utils btrfs-progs limine efibootmgr nvim networkmanager man btop fastfetch git tree sudo
+pacstrap -K /mnt base base-devel linux linux-firmware util-linux ufw pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber sof-firmware bluez bluez-utils btrfs-progs limine efibootmgr nvim networkmanager man btop fastfetch git tree sudo memtest86+-efi
 
 # Generate fstab
 genfstab /mnt > /mnt/etc/fstab
@@ -179,10 +182,12 @@ else
 fi
 END
 
-arch-chroot /mnt /bin/bash << END
+arch-chroot /mnt /bin/bash <<END
 systemctl enable NetworkManager
 systemctl enable bluetooth
+END
 
+# arch-chroot /mnt /bin/bash <<END
 # # Greetd config
 # pacman -S greetd
 
@@ -249,7 +254,6 @@ systemctl enable bluetooth
 # exit
 # umount -a
 # reboot
-END
+# END
 
-clear -x
 echo FERTIG
