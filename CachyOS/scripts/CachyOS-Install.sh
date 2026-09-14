@@ -94,7 +94,7 @@ btrfs filesystem mkswapfile --size 4g --uuid clear /mnt/swap/swapfile
 swapon -p 0 /mnt/swap/swapfile
 
 # Install essential packages
-pacman -Syyu
+pacman -Syyu --noconfirm
 pacstrap -K /mnt base base-devel linux linux-firmware util-linux ufw pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber sof-firmware bluez bluez-utils btrfs-progs limine efibootmgr nvim networkmanager man btop fastfetch git tree sudo memtest86+-efi
 
 # Generate fstab
