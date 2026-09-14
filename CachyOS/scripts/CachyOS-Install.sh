@@ -256,6 +256,8 @@ END
 
 clear
 echo -e "Installation finished.\n\n\n"
+arch-chroot \mnt fastfetch
+echo -e "\n\n\n"
 read -r -p "Press any key to reboot into CachyOS." key
 umount -a
 reboot
