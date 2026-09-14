@@ -58,6 +58,9 @@ parted --script /dev/${partDisk} \
 # Format the Partitions
 if [[ $partDisk == *"nvme"* ]]; then
   partDisk="${partDisk}p"
+  zstd="1"
+else
+  zstd="2"
 fi
 
 mkfs.fat -F 32 /dev/${partDisk}1
@@ -83,11 +86,11 @@ btrfs subvolume create /mnt/@snapshots
 
 # Mount the file system
 umount /mnt
-mount -o subvol=@ ${rootDisk} /mnt
-mount --mkdir -o subvol=@home ${rootDisk} /mnt/home
-mount --mkdir -o subvol=@var_log ${rootDisk} /mnt/var/log
-mount --mkdir -o subvol=@var_cache ${rootDisk} /mnt/var/cache
-mount --mkdir -o subvol=@snapshots ${rootDisk} /mnt/.snapshots
+mount -o compress=zstd:${zstd},noatime,subvol=@ ${rootDisk} /mnt
+mount --mkdir -o compress=zstd:${zstd},noatime,subvol=@home ${rootDisk} /mnt/home
+mount --mkdir -o compress=zstd:${zstd},noatime,subvol=@var_log ${rootDisk} /mnt/var/log
+mount --mkdir -o compress=zstd:${zstd},noatime,subvol=@var_cache ${rootDisk} /mnt/var/cache
+mount --mkdir -o compress=zstd:${zstd},noatime,subvol=@snapshots ${rootDisk} /mnt/.snapshots
 mount --mkdir /dev/${partDisk}1 /mnt/boot
 
 # Install essential packages
@@ -196,6 +199,11 @@ END
 arch-chroot /mnt /bin/bash <<END
 pacman -S ly brightnessctl xorg-xauth --noconfirm
 systemctl enable ly@tty1.service
+END
+
+# QTile Setup
+arch-chroot /mnt /bin/bash <<END
+pacman -S qtile --noconfirm
 END
 
 # arch-chroot /mnt /bin/bash <<END
