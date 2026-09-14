@@ -199,14 +199,6 @@ systemctl enable ly@tty1.service
 END
 
 # arch-chroot /mnt /bin/bash <<END
-# sed -i 's/command = "agreety*/command = "agreety --cmd start-hyprland"
-
-# systemctl enable greetd.service
-
-# # Grub config
-# sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=0/' /etc/default/grub
-# grub-mkconfig -o /boot/grub/grub.cfg
-
 # # Keyboard config
 # curl --create-dirs -LJO --output-dir /usr/share/X11/xkb/symbols/custom https://raw.githubusercontent.com/SunaaRisu/Arch-Linux-Install/refs/heads/main/Arch-Hyprland-WM/Laptop/kb/custom
 
@@ -258,10 +250,12 @@ END
 #   cp -r ./Arch-Linux-Install/images/ /home/sunaa/.config/hypr/
 #   cp Arch-Linux-Install/Arch-Hyprland-WM/Laptop/hyprpaper.conf /home/sunaa/.config/hypr/hyprpaper.conf
 # fi
-
-# exit
-# umount -a
-# reboot
 # END
 
-echo FERTIG
+
+
+clear
+echo -e "Installation finished.\n\n\n"
+read -r -p "Press any key to reboot into CachyOS." key
+umount -a
+reboot
