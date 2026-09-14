@@ -117,6 +117,14 @@ echo -e "root:${root_pass}\n${user}:${user_pass}" | chpasswd
 sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 END
 
+# Setup Swap
+arch-chroot /mnt /bin/bash <<END
+  btrfs subvolume create /swap
+  btrfs filesystem mkswapfile --size $(awk '/MemTotal/ {print int(($2 / 1000 / 1000) + 1)}' /proc/meminfo)g --uuid clear /swap/swapfile
+  swapon -p 0 /swap/swapfile
+  echo "/swap/swapfile none swap defaults,pri=0 0 0" >> /etc/fstab
+END
+
 # Edit mkinitcpio
 arch-chroot /mnt /bin/bash <<END
 sed -i 's/MODULES=()/MODULES=(btrfs)/' /etc/mkinitcpio.conf
@@ -141,7 +149,7 @@ efibootmgr --create --disk /dev/${partDisk} --part 1 \
 
 if [[ "$encrypt" =~ ^([yY][eE][sS]|[yY])$ ]]
 then
-  echo "timeout: 3
+  echo "timeout: 1
 
   /Arch Linux
       protocol: linux
@@ -159,18 +167,18 @@ then
     protocol: efi
     path: boot():/memtest86+/memtest.efi" > /boot/EFI/limine/limine.conf
 else
-  echo "timeout: 3
+  echo "timeout: 1
 
   /Arch Linux
       protocol: linux
       path: boot():/vmlinuz-linux
-      cmdline: quiet root=$(blkid -o value -s UUID /dev/${partDisk}2) rw rootflags=subvol=@ rootfstype=btrfs
+      cmdline: quiet root=UUID=$(blkid -o value -s UUID /dev/${partDisk}2) rw rootflags=subvol=@ rootfstype=btrfs
       module_path: boot():/initramfs-linux.img
 
   /Arch Linux (fallback)
       protocol: linux
       path: boot():/vmlinuz-linux
-      cmdline: quiet root=$(blkid -o value -s UUID /dev/${partDisk}2) rw rootflags=subvol=@ rootfstype=btrfs
+      cmdline: quiet root=UUID=$(blkid -o value -s UUID /dev/${partDisk}2) rw rootflags=subvol=@ rootfstype=btrfs
       module_path: boot():/initramfs-linux-fallback.img
   
   /Memtest86+
