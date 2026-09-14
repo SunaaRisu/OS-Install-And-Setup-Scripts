@@ -192,10 +192,13 @@ systemctl enable NetworkManager
 systemctl enable bluetooth
 END
 
-# arch-chroot /mnt /bin/bash <<END
-# # Greetd config
-# pacman -S greetd
+# Ly Setup
+arch-chroot /mnt /bin/bash <<END
+pacman -S ly brightnessctl
+systemctl enable ly@tty1.service
+END
 
+# arch-chroot /mnt /bin/bash <<END
 # sed -i 's/command = "agreety*/command = "agreety --cmd start-hyprland"
 
 # systemctl enable greetd.service
