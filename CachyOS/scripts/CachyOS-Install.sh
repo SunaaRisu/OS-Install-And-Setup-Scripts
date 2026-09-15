@@ -203,7 +203,7 @@ END
 
 # QTile Setup
 arch-chroot /mnt /bin/bash <<END
-pacman -S qtile --noconfirm
+pacman -S qtile ttf-jetbrains-mono-nerd --noconfirm
 END
 
 # arch-chroot /mnt /bin/bash <<END
