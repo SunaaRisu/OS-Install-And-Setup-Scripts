@@ -208,6 +208,17 @@ arch-chroot /mnt /bin/bash <<END
 pacman -S qtile ttf-jetbrains-mono-nerd --noconfirm
 END
 
+# Install paru
+arch-chroot /mnt /bin/bash <<END
+mkdir aur
+cd aur
+git clone https://aur.archlinux.org/paru.git
+cd paru
+makepkg -si
+cd ../..
+rm -r aur
+END
+
 # arch-chroot /mnt /bin/bash <<END
 # # Keyboard config
 # curl --create-dirs -LJO --output-dir /usr/share/X11/xkb/symbols/custom https://raw.githubusercontent.com/SunaaRisu/Arch-Linux-Install/refs/heads/main/Arch-Hyprland-WM/Laptop/kb/custom
