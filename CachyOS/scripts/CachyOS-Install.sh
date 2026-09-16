@@ -199,7 +199,7 @@ END
 
 # Ly Setup
 arch-chroot /mnt /bin/bash <<END
-pacman -S ly brightnessctl xorg-xauth xorg-server --noconfirm
+pacman -S ly brightnessctl --noconfirm
 systemctl enable ly@tty1.service
 END
 
