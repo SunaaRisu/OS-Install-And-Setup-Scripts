@@ -92,6 +92,8 @@ mount --mkdir -o compress=zstd:${zstd},noatime,subvol=@var_log ${rootDisk} /mnt/
 mount --mkdir -o compress=zstd:${zstd},noatime,subvol=@var_cache ${rootDisk} /mnt/var/cache
 mount --mkdir -o compress=zstd:${zstd},noatime,subvol=@snapshots ${rootDisk} /mnt/.snapshots
 mount --mkdir /dev/${partDisk}1 /mnt/boot
+mkdir -p /mnt/boot/EFI/BOOT/
+sudo mount --bind /boot/EFI/limine /boot/EFI/BOOT
 
 # Install essential packages
 pacman -Syyu --noconfirm
