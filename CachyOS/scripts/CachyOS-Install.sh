@@ -173,22 +173,28 @@ then
     path: boot():/memtest86+/memtest.efi" > /boot/EFI/limine/limine.conf
 else
   echo "timeout: 1
+  #quiet: yes
+  #remember_last_entry: yes
 
-  /Arch Linux
-      protocol: linux
-      path: boot():/vmlinuz-linux
-      cmdline: quiet root=UUID=$(blkid -o value -s UUID /dev/${partDisk}2) rw rootflags=subvol=@ rootfstype=btrfs
-      module_path: boot():/initramfs-linux.img
-
-  /Arch Linux (fallback)
-      protocol: linux
-      path: boot():/vmlinuz-linux
-      cmdline: quiet root=UUID=$(blkid -o value -s UUID /dev/${partDisk}2) rw rootflags=subvol=@ rootfstype=btrfs
-      module_path: boot():/initramfs-linux-fallback.img
+  /+Arch Linux
+  comment: $(cat /etc/machine-id)
   
-  /Memtest86+
-    protocol: efi
-    path: boot():/memtest86+/memtest.efi" > /boot/EFI/limine/limine.conf
+      //Arch Linux
+          protocol: linux
+          path: boot():/vmlinuz-linux
+          cmdline: quiet root=UUID=$(blkid -o value -s UUID /dev/${partDisk}2) rw rootflags=subvol=@ rootfstype=btrfs
+          module_path: boot():/initramfs-linux.img
+
+      //Arch Linux (fallback)
+          protocol: linux
+          path: boot():/vmlinuz-linux
+          cmdline: quiet root=UUID=$(blkid -o value -s UUID /dev/${partDisk}2) rw rootflags=subvol=@ rootfstype=btrfs
+          module_path: boot():/initramfs-linux-fallback.img
+
+  /Helper Programs
+      /Memtest86+
+          protocol: efi
+          path: boot():/memtest86+/memtest.efi" > /boot/EFI/limine/limine.conf
 fi
 END
 
