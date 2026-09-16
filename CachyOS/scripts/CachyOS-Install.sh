@@ -93,7 +93,6 @@ mount --mkdir -o compress=zstd:${zstd},noatime,subvol=@var_cache ${rootDisk} /mn
 mount --mkdir -o compress=zstd:${zstd},noatime,subvol=@snapshots ${rootDisk} /mnt/.snapshots
 mount --mkdir /dev/${partDisk}1 /mnt/boot
 mkdir -p /mnt/boot/EFI/BOOT/
-sudo mount --bind /boot/EFI/limine /boot/EFI/BOOT
 
 # Install essential packages
 pacman -Syyu --noconfirm
@@ -101,6 +100,7 @@ pacstrap -K /mnt base base-devel linux linux-firmware util-linux ufw pipewire pi
 
 # Generate fstab
 genfstab /mnt > /mnt/etc/fstab
+echo "/boot/EFI/limine /boot/EFI/BOOT none bind,defaults 0 0"
 
 # Set hostname
 echo $hn > /mnt/etc/hostname
@@ -175,6 +175,7 @@ else
   echo "timeout: 1
   #quiet: yes
   #remember_last_entry: yes
+  default_entry: 2
 
   /+Arch Linux
   comment: $(cat /etc/machine-id)
@@ -192,7 +193,7 @@ else
           module_path: boot():/initramfs-linux-fallback.img
 
   /Helper Programs
-      /Memtest86+
+      //Memtest86+
           protocol: efi
           path: boot():/memtest86+/memtest.efi" > /boot/EFI/limine/limine.conf
 fi
@@ -211,7 +212,7 @@ END
 
 # QTile Setup
 arch-chroot /mnt /bin/bash <<END
-pacman -S qtile ttf-jetbrains-mono-nerd --noconfirm
+pacman -S qtile ttf-jetbrains-mono-nerd xorg-xwayland --noconfirm
 END
 
 # Install paru
