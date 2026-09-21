@@ -44,6 +44,9 @@ else
   read -r -p "Root Password: " root_pass
 fi
 
+# Write all output to installer.log
+exec &> ./installer.log
+
 # Update the system clock
 timedatectl
 
@@ -252,6 +255,10 @@ END
 #   sed -i 's/gtk-icon-theme-name = Adwaita/gtk-icon-theme-name = Gruvbox-Dark' /usr/share/gtk-4.0/settings.ini
 #   sed -i 's/gtk-theme-name = Adwaita/gtk-theme-name = Gruvbox-Dark' /usr/share/gtk-4.0/settings.ini
 
+arch-chroot /mnt /bin/bash <<END
+timedatectl
+timedatectl set-ntp true
+END
 
 clear
 echo -e "Installation finished.\n\n\n"
