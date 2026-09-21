@@ -213,9 +213,15 @@ systemctl enable NetworkManager
 systemctl enable bluetooth
 END
 
+# Download the config files from Github
+arch-chroot /mnt /bin/bash <<END
+git clone https://github.com/SunaaRisu/OS-Install-And-Setup-Scripts.git
+END
+
 # Ly Setup
 arch-chroot /mnt /bin/bash <<END
 pacman -S ly brightnessctl --noconfirm
+mv ./OS-Install-And-Setup-Scripts/global-configs/ly/* /etc/ly/
 systemctl enable ly@tty1.service
 END
 
