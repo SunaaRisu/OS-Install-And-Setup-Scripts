@@ -159,26 +159,30 @@ efibootmgr --create --disk /dev/${partDisk} --part 1 \
 if [[ "$encrypt" =~ ^([yY][eE][sS]|[yY])$ ]]
 then
   echo "timeout: 1
+  default_entry: 2
 
-  /Arch Linux
-      protocol: linux
-      path: boot():/vmlinuz-linux
-      cmdline: quiet cryptdevice=UUID=$(cryptsetup luksUUID /dev/${partDisk}2):root root=/dev/mapper/cryptroot rw rootflags=subvol=@ rootfstype=btrfs
-      module_path: boot():/initramfs-linux.img
+  /+Arch Linux
+  comment: $(cat /etc/machine-id)
 
-  /Arch Linux (fallback)
-      protocol: linux
-      path: boot():/vmlinuz-linux
-      cmdline: quiet cryptdevice=UUID=$(cryptsetup luksUUID /dev/${partDisk}2):root root=/dev/mapper/cryptroot rw rootflags=subvol=@ rootfstype=btrfs
-      module_path: boot():/initramfs-linux-fallback.img
+      //Arch Linux
+          protocol: linux
+          path: boot():/vmlinuz-linux
+          cmdline: quiet cryptdevice=UUID=$(cryptsetup luksUUID /dev/${partDisk}2):root root=/dev/mapper/cryptroot rw rootflags=subvol=@ rootfstype=btrfs
+          module_path: boot():/initramfs-linux.img
+
+      //Arch Linux (fallback)
+          protocol: linux
+          path: boot():/vmlinuz-linux
+          cmdline: quiet cryptdevice=UUID=$(cryptsetup luksUUID /dev/${partDisk}2):root root=/dev/mapper/cryptroot rw rootflags=subvol=@ rootfstype=btrfs
+          module_path: boot():/initramfs-linux-fallback.img
   
-  /Memtest86+
-    protocol: efi
-    path: boot():/memtest86+/memtest.efi" > /boot/EFI/limine/limine.conf
+  /Helper Programs
+      
+      //Memtest86+
+          protocol: efi
+          path: boot():/memtest86+/memtest.efi" > /boot/EFI/limine/limine.conf
 else
   echo "timeout: 1
-  #quiet: yes
-  #remember_last_entry: yes
   default_entry: 2
 
   /+Arch Linux
@@ -197,6 +201,7 @@ else
           module_path: boot():/initramfs-linux-fallback.img
 
   /Helper Programs
+      
       //Memtest86+
           protocol: efi
           path: boot():/memtest86+/memtest.efi" > /boot/EFI/limine/limine.conf
