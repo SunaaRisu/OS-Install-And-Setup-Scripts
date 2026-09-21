@@ -45,6 +45,7 @@ else
 fi
 
 # Write all output to installer.log
+exec 3>&1 4>&2
 exec &> ./installer.log
 
 # Update the system clock
@@ -259,6 +260,10 @@ arch-chroot /mnt /bin/bash <<END
 timedatectl
 timedatectl set-ntp true
 END
+
+# stop the redirect to installer.log
+exec 1>&3 2>&4
+exec 3>&- 4>&-
 
 clear
 echo -e "Installation finished.\n\n\n"
