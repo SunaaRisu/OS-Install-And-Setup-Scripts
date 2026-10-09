@@ -45,8 +45,8 @@ else
 fi
 
 # Write all output to installer.log
-exec 3>&1 4>&2
-exec &> ./installer.log
+#exec 3>&1 4>&2
+#exec &> ./installer.log
 
 # Update the system clock
 timedatectl
@@ -167,20 +167,20 @@ then
       //Arch Linux
           protocol: linux
           path: boot():/vmlinuz-linux
-          cmdline: quiet cryptdevice=UUID=$(cryptsetup luksUUID /dev/${partDisk}2):root root=/dev/mapper/cryptroot rw rootflags=subvol=@ rootfstype=btrfs
+          cmdline: quiet cryptdevice=UUID=$(cryptsetup luksUUID /dev/${partDisk}2):cryptroot root=/dev/mapper/cryptroot rw rootflags=subvol=@ rootfstype=btrfs
           module_path: boot():/initramfs-linux.img
 
       //Arch Linux (fallback)
           protocol: linux
           path: boot():/vmlinuz-linux
-          cmdline: quiet cryptdevice=UUID=$(cryptsetup luksUUID /dev/${partDisk}2):root root=/dev/mapper/cryptroot rw rootflags=subvol=@ rootfstype=btrfs
+          cmdline: quiet cryptdevice=UUID=$(cryptsetup luksUUID /dev/${partDisk}2):cryptroot root=/dev/mapper/cryptroot rw rootflags=subvol=@ rootfstype=btrfs
           module_path: boot():/initramfs-linux-fallback.img
   
   /Helper Programs
       
       //Memtest86+
           protocol: efi
-          path: boot():/memtest86+/memtest.efi" > /boot/EFI/limine/limine.conf
+          path: boot():/memtest86+/memtest86x64.efi" > /boot/EFI/limine/limine.conf
 else
   echo "timeout: 1
   default_entry: 2
@@ -273,8 +273,8 @@ timedatectl set-ntp true
 END
 
 # stop the redirect to installer.log
-exec 1>&3 2>&4
-exec 3>&- 4>&-
+#exec 1>&3 2>&4
+#exec 3>&- 4>&-
 
 clear
 echo -e "Installation finished.\n\n\n"
