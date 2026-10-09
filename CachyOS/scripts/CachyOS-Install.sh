@@ -230,28 +230,26 @@ arch-chroot /mnt /bin/bash <<END
 pacman -S qtile ttf-jetbrains-mono-nerd xorg-xwayland --noconfirm
 END
 
-# arch-chroot /mnt /bin/bash <<END
-# # Keyboard config
-# curl --create-dirs -LJO --output-dir /usr/share/X11/xkb/symbols/custom https://raw.githubusercontent.com/SunaaRisu/Arch-Linux-Install/refs/heads/main/Arch-Hyprland-WM/Laptop/kb/custom
-
-# # Bash config
-# curl --create-dirs -LJO --output-dir /home/sunaa/ https://raw.githubusercontent.com/SunaaRisu/Arch-Linux-Install/refs/heads/main/.bashrc
-# END
+# Keyboard and Bash config
+arch-chroot /mnt /bin/bash <<END
+curl --create-dirs -LJO --output-dir /usr/share/X11/xkb/symbols/custom https://raw.githubusercontent.com/SunaaRisu/Arch-Linux-Install/refs/heads/main/Arch-Hyprland-WM/Laptop/kb/custom
+curl --create-dirs -LJO --output-dir /home/sunaa/ https://raw.githubusercontent.com/SunaaRisu/Arch-Linux-Install/refs/heads/main/.bashrc
+END
 
 # Install Paru
 read -r -p "Install Paru? [y|N]" responseParu
-arch-chroot /mnt /bin/bash <<END
 if [[ "$responseParu" =~ ^([yY][eE][sS]|[yY])$ ]]
 then
-  mkdir aur
-  cd aur
-  git clone https://aur.archlinux.org/paru.git
-  cd paru
-  makepkg -si
-  cd ../..
-  rm -r aur
-fi
+arch-chroot /mnt/home/sunaa /bin/bash <<END
+mkdir aur
+cd aur
+git clone https://aur.archlinux.org/paru.git
+cd paru
+makepkg -si
+cd ../..
+rm -r aur
 END
+fi
 
 # rofi Setup
 arch-chroot /mnt /bin/bash <<END
