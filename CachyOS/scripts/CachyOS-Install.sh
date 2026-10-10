@@ -100,7 +100,7 @@ mkdir -p /mnt/boot/EFI/BOOT/
 
 # Install essential packages
 pacman -Syyu --noconfirm
-pacstrap -K /mnt base base-devel linux linux-firmware util-linux ufw pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber sof-firmware bluez bluez-utils btrfs-progs limine efibootmgr nvim networkmanager man btop fastfetch git tree sudo alacritty memtest86+-efi
+pacstrap -K /mnt base base-devel linux linux-firmware util-linux ufw pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber sof-firmware bluez bluez-utils btrfs-progs limine efibootmgr nvim networkmanager man btop fastfetch git tree sudo alacritty memtest86+-efi firefox openssh
 
 # Generate fstab
 genfstab /mnt > /mnt/etc/fstab
